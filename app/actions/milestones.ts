@@ -95,7 +95,11 @@ export async function addMilestone(formData: FormData) {
   const cookieStore = await cookies();
   const currentPartnerId = cookieStore.get('partner_session')?.value;
   if (currentPartnerId) {
-    notifyPartner(coupleId, currentPartnerId, 'Hành trình mới vừa được thêm! ✨', `<p>Người ấy vừa ghi lại một kỷ niệm mới trên hành trình: <strong>${title}</strong></p><p>Vào trang chủ để xem họ đã lưu lại điều gì nhé!</p>`).catch(console.error);
+    try {
+      await notifyPartner(coupleId, currentPartnerId, 'Hành trình mới vừa được thêm! ✨', `<p>Người ấy vừa ghi lại một kỷ niệm mới trên hành trình: <strong>${title}</strong></p><p>Vào trang chủ để xem họ đã lưu lại điều gì nhé!</p>`);
+    } catch(err) {
+      console.error(err);
+    }
   }
 
   return { success: true, data };

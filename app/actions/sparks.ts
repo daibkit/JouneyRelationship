@@ -45,15 +45,19 @@ export async function addMusicPick(partnerId: string, spotifyUrl: string, messag
 
   if (error) return { error: error.message };
 
-  notifyPartner(
-    coupleId,
-    partnerId,
-    'Người ấy vừa gửi một bài hát mới cho bạn! 🎵',
-    `<p>Người ấy vừa chia sẻ bài nhạc này vào danh sách nghe chung của hai người:</p>
-     <p><a href="${spotifyUrl}" target="_blank">${spotifyUrl}</a></p>
-     ${message ? `<p>Lời nhắn: <em>"${message}"</em></p>` : ''}
-     <p>Hãy mở ứng dụng lên để cùng thưởng thức nhé!</p>`
-  ).catch(console.error);
+  try {
+    await notifyPartner(
+      coupleId,
+      partnerId,
+      'Người ấy vừa gửi một bài hát mới cho bạn! 🎵',
+      `<p>Người ấy vừa chia sẻ bài nhạc này vào danh sách nghe chung của hai người:</p>
+       <p><a href="${spotifyUrl}" target="_blank">${spotifyUrl}</a></p>
+       ${message ? `<p>Lời nhắn: <em>"${message}"</em></p>` : ''}
+       <p>Hãy mở ứng dụng lên để cùng thưởng thức nhé!</p>`
+    );
+  } catch (err) {
+    console.error(err);
+  }
 
   return { success: true, data };
 }
@@ -111,14 +115,18 @@ export async function upsertDailyMood(partnerId: string, date: string, mood: str
   if (mood === 'romantic') emoji = '🥰';
 
   // Send email to the other partner
-  notifyPartner(
-    coupleId, 
-    partnerId, 
-    `Người ấy hôm nay đang cảm thấy ${mood} ${emoji}`, 
-    `<p>Người ấy vừa cập nhật trạng thái hôm nay là: <strong>${mood}</strong></p>
-     ${note ? `<p>Kèm theo ghi chú: <em>"${note}"</em></p>` : ''}
-     <p>Hãy mở ứng dụng lên để xem nhé!</p>`
-  ).catch(console.error);
+  try {
+    await notifyPartner(
+      coupleId, 
+      partnerId, 
+      `Người ấy hôm nay đang cảm thấy ${mood} ${emoji}`, 
+      `<p>Người ấy vừa cập nhật trạng thái hôm nay là: <strong>${mood}</strong></p>
+       ${note ? `<p>Kèm theo ghi chú: <em>"${note}"</em></p>` : ''}
+       <p>Hãy mở ứng dụng lên để xem nhé!</p>`
+    );
+  } catch (err) {
+    console.error(err);
+  }
 
   return { success: true, data };
 }
@@ -157,8 +165,11 @@ export async function addLoveCoupon(senderId: string, receiverId: string, title:
 
   if (error) return { error: error.message };
   
-  // Send email notification non-blocking
-  sendNotificationEmail(receiverId, 'Bạn nhận được một Đặc Quyền Tình Yêu mới! 💝', `<p>Người ấy vừa gửi cho bạn một Đặc quyền: <strong>${title}</strong>!</p><p>Hãy vào Ví Đặc Quyền trên ứng dụng để kiểm tra nhé!</p>`).catch(console.error);
+  try {
+    await sendNotificationEmail(receiverId, 'Bạn nhận được một Đặc Quyền Tình Yêu mới! 💝', `<p>Người ấy vừa gửi cho bạn một Đặc quyền: <strong>${title}</strong>!</p><p>Hãy vào Ví Đặc Quyền trên ứng dụng để kiểm tra nhé!</p>`);
+  } catch (err) {
+    console.error(err);
+  }
 
   return { success: true, data };
 }
@@ -216,7 +227,11 @@ export async function addTimeCapsule(senderId: string, receiverId: string, conte
 
   if (error) return { error: error.message };
 
-  sendNotificationEmail(receiverId, 'Một Lá Thư Xuyên Thời Gian vừa được gửi cho bạn! ⏳', `<p>Người ấy vừa viết cho bạn một lá thư thời gian chân thành. Bức thư này sẽ được mở ra đọc vào ngày <strong>${openDate}</strong>.</p><p>Đừng quên nhé!</p>`).catch(console.error);
+  try {
+    await sendNotificationEmail(receiverId, 'Một Lá Thư Xuyên Thời Gian vừa được gửi cho bạn! ⏳', `<p>Người ấy vừa viết cho bạn một lá thư thời gian chân thành. Bức thư này sẽ được mở ra đọc vào ngày <strong>${openDate}</strong>.</p><p>Đừng quên nhé!</p>`);
+  } catch(err) {
+    console.error(err);
+  }
 
   return { success: true, data };
 }
