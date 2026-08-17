@@ -7,6 +7,7 @@ export interface Partner {
   dob: string | null;
   hobbies: string | null;
   avatar_url: string | null;
+  email: string | null;
 }
 
 export interface Couple {

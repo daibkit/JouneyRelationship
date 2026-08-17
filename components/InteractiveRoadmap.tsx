@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { MapPin, CalendarHeart, Stars, Plus, Edit2, Trash2, Loader2, X } from 'lucide-react';
+import { MapPin, CalendarHeart, Stars, Plus, Edit2, Trash2, Loader2, X, Image as ImageIcon } from 'lucide-react';
 import { Milestone } from '@/types/database';
 import { getMilestones, addMilestone, updateMilestone, deleteMilestone } from '@/app/actions/milestones';
 import { useI18nStore } from '@/store/useI18nStore';
@@ -33,6 +33,8 @@ export default function InteractiveRoadmap() {
     location: '',
     mood: 'romantic'
   });
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
 
   const fetchMilestones = async () => {
     setIsLoading(true);
@@ -62,6 +64,8 @@ export default function InteractiveRoadmap() {
       location: m.location || '',
       mood: m.mood || 'romantic'
     });
+    setImageFile(null);
+    setImagePreview(m.image_url || null);
     setIsModalOpen(true);
   };
 
@@ -79,6 +83,9 @@ export default function InteractiveRoadmap() {
     Object.entries(formData).forEach(([key, value]) => {
       data.append(key, value);
     });
+    if (imageFile) {
+      data.append('image', imageFile);
+    }
 
     if (editingId) {
       const res = await updateMilestone(editingId, data);
@@ -163,6 +170,12 @@ export default function InteractiveRoadmap() {
                     <span className="text-lg" title={milestone.mood || 'romantic'}>{MOOD_ICONS[milestone.mood || 'romantic'] || '💕'}</span>
                   </div>
                   
+                  {milestone.image_url && (
+                    <div className="mb-4 rounded-2xl overflow-hidden w-full h-48 sm:h-56">
+                      <img src={milestone.image_url} alt={milestone.title} className="w-full h-full object-cover select-none pointer-events-none" />
+                    </div>
+                  )}
+                  
                   <h3 className="text-lg font-serif font-bold text-slate-800 mb-2">{milestone.title}</h3>
                   <p className="text-sm text-slate-600 mb-3 whitespace-pre-wrap leading-relaxed">
                     {milestone.description}
@@ -237,6 +250,27 @@ export default function InteractiveRoadmap() {
                       </button>
                     ))}
                   </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">{dict.roadmap.imageLabel}</label>
+                  <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-slate-200 border-dashed rounded-xl cursor-pointer bg-slate-50 hover:bg-slate-100 transition-all overflow-hidden relative">
+                    {imagePreview ? (
+                      <img src={imagePreview} className="w-full h-full object-cover" alt="Preview" />
+                    ) : (
+                      <div className="flex flex-col items-center justify-center text-slate-400">
+                        <ImageIcon className="w-6 h-6 mb-2 text-pink-400 opacity-70" />
+                        <span className="text-sm font-medium text-slate-500">Click to upload photo</span>
+                      </div>
+                    )}
+                    <input type="file" accept="image/*" className="hidden" onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        setImageFile(file);
+                        setImagePreview(URL.createObjectURL(file));
+                      }
+                    }} />
+                  </label>
                 </div>
 
                 <div className="pt-4">

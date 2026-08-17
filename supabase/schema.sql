@@ -17,6 +17,7 @@ CREATE TABLE IF NOT EXISTS public.partners (
   dob date,           -- Ngày sinh
   hobbies text,       -- Sở thích (có thể linh hoạt lưu trữ JSON hoặc text)
   avatar_url text,
+  email text,         -- Notification email
   created_at timestamp with time zone DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 

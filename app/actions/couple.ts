@@ -66,3 +66,39 @@ export async function updatePartnerProfile(partnerId: string, updates: any) {
   if (error) return { error: error.message };
   return { success: true, data };
 }
+
+export async function uploadAvatar(formData: FormData) {
+  const coupleId = await getCoupleId();
+  if (!coupleId) return { error: 'Unauthorized' };
+
+  const partnerId = formData.get('partnerId') as string;
+  const imageFile = formData.get('image') as File | null;
+
+  if (!partnerId || !imageFile) return { error: 'Missing required parameters' };
+
+  const fileExt = imageFile.name.split('.').pop()?.toLowerCase() || 'jpg';
+  const fileName = `${partnerId}_${Date.now()}.${fileExt}`;
+
+  const { error: uploadError } = await supabase.storage
+    .from('avatars')
+    .upload(fileName, imageFile, { upsert: true });
+
+  if (uploadError) return { error: uploadError.message };
+
+  const { data: publicUrlData } = supabase.storage
+    .from('avatars')
+    .getPublicUrl(fileName);
+
+  // Auto update user avatar
+  const { data, error: updateError } = await supabase
+    .from('partners')
+    .update({ avatar_url: publicUrlData.publicUrl })
+    .eq('id', partnerId)
+    .eq('couple_id', coupleId)
+    .select()
+    .single();
+
+  if (updateError) return { error: updateError.message };
+  
+  return { success: true, data };
+}
