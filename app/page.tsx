@@ -1,12 +1,11 @@
 'use client';
 
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import LoveCounter from '@/components/LoveCounter';
 import DeepTalk from '@/components/DeepTalk';
 import MusicToday from '@/components/Sparks/MusicToday';
 import MoodTracker from '@/components/Sparks/MoodTracker';
 import TimeCapsule from '@/components/Sparks/TimeCapsule';
-import LoveCoupons from '@/components/Sparks/LoveCoupons';
 import InteractiveRoadmap from '@/components/InteractiveRoadmap';
 import BucketList from '@/components/BucketList';
 import LanguageSwitcher from '@/components/LanguageSwitcher';
@@ -21,6 +20,7 @@ import { useRouter } from 'next/navigation';
 export default function Home() {
   const [activeTab, setActiveTab] = useState('home');
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [isDrawingCard, setIsDrawingCard] = useState(false);
   const { dict } = useI18nStore();
   const router = useRouter();
   
@@ -141,21 +141,31 @@ export default function Home() {
             </div>
             
             <div className="flex flex-col md:grid md:grid-cols-12 gap-6 mt-10 max-w-5xl mx-auto w-full">
+              <AnimatePresence mode="popLayout">
+                {/* Deep Talk (Cards) */}
+                <motion.div 
+                  layout
+                  key="deep-talk"
+                  className={`transition-all duration-500 ease-in-out ${isDrawingCard ? 'md:col-span-12 max-w-3xl mx-auto w-full' : 'md:col-span-6'} min-h-[350px]`}
+                >
+                  <DeepTalk onDrawStateChange={setIsDrawingCard} />
+                </motion.div>
 
-              {/* Deep Talk (Cards) */}
-              <div className="md:col-span-6 min-h-[350px]">
-                <DeepTalk />
-              </div>
-
-              {/* Time Capsule and Coupons small grid */}
-              <div className="md:col-span-6 flex flex-col md:grid md:grid-cols-2 gap-6">
-                <div className="min-h-[200px] h-full w-full">
-                  <TimeCapsule />
-                </div>
-                <div className="min-h-[200px] h-full w-full">
-                  <LoveCoupons />
-                </div>
-              </div>
+                {/* Time Capsule */}
+                {!isDrawingCard && (
+                  <motion.div 
+                    layout
+                    key="time-capsule"
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.95, transition: { duration: 0.2 } }}
+                    transition={{ duration: 0.3 }}
+                    className="md:col-span-6 min-h-[350px] w-full origin-left"
+                  >
+                    <TimeCapsule />
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
           </motion.div>
         )}

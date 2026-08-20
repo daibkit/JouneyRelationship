@@ -39,7 +39,11 @@ const DECKS = {
 
 type DeckKey = keyof typeof DECKS;
 
-export default function DeepTalk() {
+interface DeepTalkProps {
+  onDrawStateChange?: (isDrawing: boolean) => void;
+}
+
+export default function DeepTalk({ onDrawStateChange }: DeepTalkProps = {}) {
   const { dict, locale } = useI18nStore();
   const [selectedDeckId, setSelectedDeckId] = useState<DeckKey | null>(null);
   
@@ -56,6 +60,8 @@ export default function DeepTalk() {
     setIsFlipped(false);
     setCurrentText('');
     
+    if (onDrawStateChange) onDrawStateChange(true);
+
     setIsLoading(true);
     const res = await getQuestionsByCategory(key);
     if (res.data) {
@@ -67,6 +73,7 @@ export default function DeepTalk() {
   const handleBackToDecks = () => {
     setSelectedDeckId(null);
     setQuestions([]);
+    if (onDrawStateChange) onDrawStateChange(false);
   };
 
   const drawCard = () => {
@@ -75,7 +82,31 @@ export default function DeepTalk() {
     
     setTimeout(() => {
       const activeLanguage = locale === 'en' ? 'en' : 'vi';
-      const randomQMsg = questions[Math.floor(Math.random() * questions.length)];
+
+      // Load seen questions for this deck in the current session
+      const sessionKey = `seen_deck_${selectedDeckId}`;
+      let seenIds: string[] = [];
+      try {
+        seenIds = JSON.parse(sessionStorage.getItem(sessionKey) || '[]');
+      } catch (e) {
+        seenIds = [];
+      }
+
+      // Filter unseen
+      let unseenQuestions = questions.filter(q => !seenIds.includes(q.id));
+      
+      // Reset if all are seen
+      if (unseenQuestions.length === 0) {
+        unseenQuestions = questions;
+        seenIds = [];
+      }
+
+      // Pick randomly from unseen
+      const randomQMsg = unseenQuestions[Math.floor(Math.random() * unseenQuestions.length)];
+      
+      // Save it as seen
+      seenIds.push(randomQMsg.id);
+      sessionStorage.setItem(sessionKey, JSON.stringify(seenIds));
       
       let text = '';
       try {
