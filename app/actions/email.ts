@@ -25,11 +25,25 @@ export async function sendNotificationEmail(partnerId: string, subject: string, 
     }
 
     // 2. Send the email via Resend
+    const appUrl = process.env.NEXT_PUBLIC_SITE_URL || process.env.NEXT_PUBLIC_APP_URL || 'https://uspath.app';
+    const wrappedHtmlMessage = `
+      <div style="font-family: sans-serif; color: #333; max-width: 600px; margin: 0 auto;">
+        <div style="padding: 20px; text-align: left;">
+          ${htmlMessage}
+        </div>
+        <div style="text-align: center; margin-top: 20px; padding-bottom: 20px;">
+          <a href="${appUrl}" style="display: inline-block; padding: 12px 28px; background-color: #f43f5e; color: #ffffff; text-decoration: none; border-radius: 8px; font-size: 16px; font-weight: bold; box-shadow: 0 4px 6px rgba(244, 63, 94, 0.2);">
+            Mở Trang Web
+          </a>
+        </div>
+      </div>
+    `;
+
     const { data, error: sendError } = await resend.emails.send({
       from: 'Relationship Journey <notifications@uspath.app>',
       to: [partner.email],
       subject: subject,
-      html: htmlMessage,
+      html: wrappedHtmlMessage,
     });
 
     if (sendError) {
