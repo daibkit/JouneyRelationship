@@ -16,3 +16,20 @@ export async function getQuestionsByCategory(category: string) {
 
   return { data };
 }
+
+export async function saveQuestion(category: string, questionTextObj: any) {
+  const { data, error } = await supabase
+    .from('question_bank')
+    .insert([
+      { category, question_text: JSON.stringify(questionTextObj) }
+    ])
+    .select('id, category, question_text')
+    .single();
+
+  if (error) {
+    console.error('Error saving question:', error);
+    return { error: 'Failed to save question' };
+  }
+
+  return { data };
+}

@@ -2,9 +2,10 @@
 
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { MessageCircleHeart, Flame, RefreshCcw, SmilePlus, Rocket, Wine, ArrowLeft, Loader2 } from 'lucide-react';
+import { MessageCircleHeart, Flame, RefreshCcw, SmilePlus, Rocket, Wine, ArrowLeft, Loader2, Sparkles, Save } from 'lucide-react';
 import { useI18nStore } from '@/store/useI18nStore';
-import { getQuestionsByCategory } from '@/app/actions/questions';
+import { getQuestionsByCategory, saveQuestion } from '@/app/actions/questions';
+import { generateQuestionWithAI } from '@/app/actions/gemini';
 
 const DECKS = {
   fun: {
@@ -53,12 +54,18 @@ export default function DeepTalk({ onDrawStateChange }: DeepTalkProps = {}) {
   const [currentText, setCurrentText] = useState<string>('');
   const [isFlipped, setIsFlipped] = useState(false);
   const [hasDrawn, setHasDrawn] = useState(false);
+  
+  const [isAiQuestion, setIsAiQuestion] = useState(false);
+  const [isSavingAi, setIsSavingAi] = useState(false);
+  const [currentAiQuestionObj, setCurrentAiQuestionObj] = useState<any>(null);
 
   const handleDeckSelect = async (key: DeckKey) => {
     setSelectedDeckId(key);
     setHasDrawn(false);
     setIsFlipped(false);
     setCurrentText('');
+    setIsAiQuestion(false);
+    setCurrentAiQuestionObj(null);
     
     if (onDrawStateChange) onDrawStateChange(true);
 
@@ -76,9 +83,53 @@ export default function DeepTalk({ onDrawStateChange }: DeepTalkProps = {}) {
     if (onDrawStateChange) onDrawStateChange(false);
   };
 
+  const handleSaveAiQuestion = async () => {
+    if (!selectedDeckId || !currentAiQuestionObj) return;
+    setIsSavingAi(true);
+    const res = await saveQuestion(selectedDeckId, currentAiQuestionObj);
+    if (res.data) {
+      setQuestions([...questions, res.data]);
+      alert(locale === 'en' ? 'Saved to database successfully!' : 'Đã lưu vào cơ sở dữ liệu!');
+    } else {
+      alert(locale === 'en' ? 'Failed to save question' : 'Không thể lưu câu hỏi');
+    }
+    setIsSavingAi(false);
+    setIsAiQuestion(false);
+  };
+
+  const drawCardWithAi = async () => {
+    if (!selectedDeckId) return;
+    setIsFlipped(false);
+    setIsLoading(true);
+
+    const activeLanguage = locale === 'en' ? 'en' : 'vi';
+
+    const res = await generateQuestionWithAI(selectedDeckId, questions.map(q => {
+      try { return JSON.parse(q.question_text)[activeLanguage] } 
+      catch (e) { return q.question_text }
+    }));
+
+    setIsLoading(false);
+
+    if (res.error || !res.data) {
+      alert(res.error || 'Failed to generate AI question');
+      return;
+    }
+
+    const aiQ = res.data;
+    
+    setCurrentAiQuestionObj(aiQ);
+    setCurrentText(aiQ[activeLanguage] || aiQ['en']);
+    setIsAiQuestion(true);
+    setHasDrawn(true);
+    setTimeout(() => setIsFlipped(true), 100);
+  };
+
   const drawCard = () => {
     if (!selectedDeckId || questions.length === 0) return;
     setIsFlipped(false);
+    setIsAiQuestion(false);
+    setCurrentAiQuestionObj(null);
     
     setTimeout(() => {
       const activeLanguage = locale === 'en' ? 'en' : 'vi';
@@ -233,6 +284,18 @@ export default function DeepTalk({ onDrawStateChange }: DeepTalkProps = {}) {
                             return <Icon className="w-12 h-12 text-slate-800" />;
                           })()}
                         </div>
+                        {isAiQuestion && !isSavingAi && (
+                          <button 
+                            onClick={(e) => {
+                               e.stopPropagation();
+                               handleSaveAiQuestion();
+                            }}
+                            className="absolute top-6 right-6 p-2 text-pink-500 bg-pink-50 rounded-full hover:bg-pink-100 transition-colors shadow-sm z-50"
+                            title={locale === 'en' ? 'Save to Database' : 'Lưu vào CSDL'}
+                          >
+                            <Save className="w-5 h-5" />
+                          </button>
+                        )}
                         <span className="text-[10px] font-bold tracking-widest uppercase mb-4 text-pink-500">
                           Question
                         </span>
@@ -247,16 +310,26 @@ export default function DeepTalk({ onDrawStateChange }: DeepTalkProps = {}) {
                 </AnimatePresence>
               </div>
 
-              <button
-                onClick={drawCard}
-                disabled={isLoading || questions.length === 0}
-                className={`w-full max-w-[250px] text-white py-4 flex justify-center items-center gap-2 rounded-2xl font-bold uppercase tracking-wider shadow-lg hover:shadow-xl transition-all active:scale-95 disabled:opacity-50 disabled:active:scale-100 ${
-                  selectedDeckId ? `bg-gradient-to-br ${DECKS[selectedDeckId].color}` : 'bg-pink-500'
-                }`}
-              >
-                <Flame className="w-5 h-5" />
-                {dict.deepTalk.drawBtn}
-              </button>
+              <div className="w-full max-w-sm flex flex-col sm:flex-row gap-3 items-center justify-center">
+                <button
+                  onClick={drawCard}
+                  disabled={isLoading || questions.length === 0}
+                  className={`w-full sm:w-1/2 text-white py-3.5 flex justify-center items-center gap-2 rounded-2xl font-bold uppercase tracking-wider shadow-lg hover:shadow-xl transition-all active:scale-95 disabled:opacity-50 disabled:active:scale-100 ${
+                    selectedDeckId ? `bg-gradient-to-br ${DECKS[selectedDeckId].color}` : 'bg-pink-500'
+                  }`}
+                >
+                  <Flame className="w-5 h-5" />
+                  {dict.deepTalk.drawBtn}
+                </button>
+                <button
+                  onClick={drawCardWithAi}
+                  disabled={isLoading}
+                  className="w-full sm:w-1/2 bg-gradient-to-br from-indigo-500 to-purple-500 text-white py-3.5 flex justify-center items-center gap-2 rounded-2xl font-bold uppercase tracking-wider shadow-lg hover:shadow-xl transition-all active:scale-95 disabled:opacity-50 disabled:active:scale-100"
+                >
+                  <Sparkles className="w-5 h-5" />
+                  {locale === 'en' ? 'AI Draw' : 'Rút AI'}
+                </button>
+              </div>
             </motion.div>
           )}
         </AnimatePresence>
