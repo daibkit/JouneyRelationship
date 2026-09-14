@@ -114,14 +114,14 @@ export default function Home() {
               <LoveCounter />
             </section>
 
-            <div className="flex flex-col md:grid md:grid-cols-12 gap-6 w-full">
+            <div className="flex flex-col md:grid md:grid-cols-12 gap-6 w-full items-start">
               {/* Music Player */}
-              <div className="md:col-span-8 min-h-[300px]">
+              <div className="md:col-span-8 w-full">
                 <MusicToday />
               </div>
               
               {/* Mood Tracker */}
-              <div className="md:col-span-4 min-h-[300px]">
+              <div className="md:col-span-4 w-full h-[400px]">
                 <MoodTracker />
               </div>
             </div>
