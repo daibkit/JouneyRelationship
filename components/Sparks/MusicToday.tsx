@@ -100,7 +100,7 @@ export default function MusicToday() {
   const embedData = pick ? getEmbedUrl(pick.spotify_url) : null;
 
   return (
-    <div className="w-full h-full relative bg-gradient-to-br from-[#1DB954]/10 to-[#191414]/10 rounded-[2.5rem] border border-[#1DB954]/20 p-6 shadow-sm overflow-hidden flex flex-col justify-between">
+    <div className="w-full h-full relative bg-gradient-to-br from-[#1DB954]/10 to-[#191414]/10 rounded-[2.5rem] border border-[#1DB954]/20 p-6 shadow-sm overflow-hidden flex flex-col">
       {/* Background Decor */}
       <div className="absolute top-0 right-0 w-48 h-48 bg-[#1DB954]/20 rounded-full blur-3xl -z-10" />
       
