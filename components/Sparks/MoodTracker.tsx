@@ -111,32 +111,34 @@ export default function MoodTracker() {
                       </button>
                     ))}
                   </div>
-                  <div className="flex gap-2">
-                    <input 
-                      type="text"
-                      className="flex-1 text-sm bg-white border border-slate-200 rounded-xl px-3 py-2 outline-none focus:border-pink-300 focus:ring-2 focus:ring-pink-100"
+                  <div className="flex flex-col gap-2">
+                    <textarea 
+                      className="w-full text-sm bg-white border border-slate-200 rounded-xl px-3 py-2 outline-none focus:border-pink-300 focus:ring-2 focus:ring-pink-100 min-h-[80px] resize-none"
                       placeholder={dict.moodTracker.notePlaceholder}
                       value={tempNote}
                       onChange={(e) => setTempNote(e.target.value)}
-                      maxLength={60}
+                      maxLength={500}
                     />
-                    <button 
-                      disabled={isUpdating}
-                      onClick={() => handleSaveMood(partner.id)}
-                      className="bg-emerald-500 text-white p-2 flex items-center justify-center rounded-xl hover:bg-emerald-600 transition-colors disabled:opacity-50"
-                    >
-                      {isUpdating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
-                    </button>
+                    <div className="flex justify-between items-center">
+                      <span className="text-xs text-slate-400">{tempNote.length}/500</span>
+                      <button 
+                        disabled={isUpdating}
+                        onClick={() => handleSaveMood(partner.id)}
+                        className="bg-emerald-500 text-white p-2 flex items-center justify-center rounded-xl hover:bg-emerald-600 transition-colors disabled:opacity-50"
+                      >
+                        {isUpdating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
+                      </button>
+                    </div>
                   </div>
                 </div>
               ) : partnerMood ? (
-                <div className="flex items-center gap-3">
-                  <div className={`w-12 h-12 rounded-2xl ${MoodConfig?.bg} flex items-center justify-center shrink-0 shadow-sm border border-white`}>
+                <div className="flex items-start gap-3">
+                  <div className={`mt-1 w-12 h-12 rounded-2xl ${MoodConfig?.bg} flex items-center justify-center shrink-0 shadow-sm border border-white`}>
                     <Icon className={`w-6 h-6 ${MoodConfig?.color}`} fill="currentColor" fillOpacity={0.2} />
                   </div>
-                  <div>
-                    {partnerMood.note && <p className="text-sm font-medium text-slate-700 italic">"{partnerMood.note}"</p>}
-                    {!partnerMood.note && <p className="text-xs font-semibold text-slate-400">{dict.moodTracker.noNote}</p>}
+                  <div className="flex-1 min-w-0 pt-1">
+                    {partnerMood.note && <p className="text-sm font-medium text-slate-700 italic break-words whitespace-pre-wrap">"{partnerMood.note}"</p>}
+                    {!partnerMood.note && <p className="text-xs font-semibold text-slate-400 mt-2">{dict.moodTracker.noNote}</p>}
                   </div>
                 </div>
               ) : (
