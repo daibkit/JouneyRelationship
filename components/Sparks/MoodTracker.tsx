@@ -83,7 +83,7 @@ export default function MoodTracker() {
           const isEditing = editingPartnerId === partner.id;
 
           return (
-            <div key={partner.id} className="bg-white/70 rounded-[1.5rem] p-4 border border-slate-100 shadow-[0_4px_20px_rgba(0,0,0,0.02)] relative overflow-hidden">
+            <div key={partner.id} className="bg-white/70 rounded-[1.5rem] p-4 border border-slate-100 shadow-[0_4px_20px_rgba(0,0,0,0.02)] relative overflow-hidden shrink-0">
               {/* Partner Header */}
               <div className="flex justify-between items-center mb-3">
                 <div className="flex items-center gap-2">
