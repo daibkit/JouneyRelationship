@@ -22,7 +22,7 @@ export default function MoodTracker() {
 
   // States for the inline editors
   const [editingPartnerId, setEditingPartnerId] = useState<string | null>(null);
-  const [tempMoodId, setTempMoodId] = useState<string>('happy');
+  const [tempMoodId, setTempMoodId] = useState<string>('romantic');
   const [tempNote, setTempNote] = useState<string>('');
   const [isUpdating, setIsUpdating] = useState(false);
 
@@ -56,7 +56,7 @@ export default function MoodTracker() {
 
   const startEditing = (partner: Partner, existingMood?: DailyMood) => {
     setEditingPartnerId(partner.id);
-    setTempMoodId(existingMood ? existingMood.mood : 'happy');
+    setTempMoodId(existingMood ? existingMood.mood : 'romantic');
     setTempNote(existingMood && existingMood.note ? existingMood.note : '');
   };
 
