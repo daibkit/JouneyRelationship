@@ -113,7 +113,11 @@ export default function LoginPage() {
                   name="code" 
                   required 
                   type="text" 
-                  className="w-full pl-14 pr-6 py-4 bg-white/50 dark:bg-slate-700/50 border-2 border-pink-100/50 dark:border-slate-600 rounded-full focus:ring-4 focus:ring-pink-200/50 focus:border-pink-400 outline-none transition-all font-bold text-slate-700 dark:text-white uppercase tracking-widest placeholder:font-normal placeholder:lowercase shadow-sm hover:border-pink-200" 
+                  autoCapitalize="none"
+                  autoComplete="off"
+                  autoCorrect="off"
+                  spellCheck="false"
+                  className="w-full pl-14 pr-6 py-4 bg-white/50 dark:bg-slate-700/50 border-2 border-pink-100/50 dark:border-slate-600 rounded-full focus:ring-4 focus:ring-pink-200/50 focus:border-pink-400 outline-none transition-all font-bold text-slate-700 dark:text-white tracking-widest placeholder:font-normal placeholder:lowercase shadow-sm hover:border-pink-200" 
                   placeholder={dict.auth.codePlaceholder}
                 />
               </div>
